@@ -45,15 +45,22 @@ normal_env.update({
   "-":operator.sub,
   "/":operator.truediv,
   "*":operator.mul,
-  
+  "pow":operator.pow,
   "eq":operator.eq,
   "lt":operator.lt,
   "le":operator.le,
   "gt":operator.gt,
   "ge":operator.ge,
   "ne":operator.ne,
+  "true":True,
+  "false":False,
   "procedure?":callable,
-  
+  "not":operator.not_,
+  "range":lambda x,y,z=1:list(range(x,y,z)),
+  "map":lambda x,y:list(map(x,y)),
+  "dict":lambda x:dict(x),
+  "update":lambda x,y: x.update(y),
+  "round":lambda x,y=0:round(x.real,y)+round(x.imag,y)*1j,
   "list":lambda *x: list(x),
   "cdr":lambda x:x[1:],
   "car":lambda x:x[0],
@@ -183,8 +190,6 @@ def evaluate(parsed,env=normal_env):
     else:
       raise Exception(f"If expects 2 or 3 parameters, not {len(parsed) - 1}")
 
-  elif parsed[0] == "map":
-    return list(map(env[parsed[1]],env[parsed[2]]))
   elif parsed[0] == "define":
     evaluated = [evaluate(x) for x in parsed[2:]]
     env[parsed[1]] = evaluated[0]
@@ -192,9 +197,11 @@ def evaluate(parsed,env=normal_env):
     (_,params,body) = parsed
     return Procedure(params,body,env)
   elif parsed[0] == "import":
-    
     importlib.import_module(parsed[1:])
-
+  elif parsed[0] == "while":
+    (_,conditional,body) = parsed
+    while evaluate(conditional):
+      evaluate(body)
   # if isinstance(parsed,list):
   #   list1 = [evaluate(x,env=env) for x in parsed]
   #   op, *args = list1
@@ -222,8 +229,11 @@ REPL
 def repl(prompt="prompt> "):
   while True:
     inputted = input(prompt)
-    print(lispstring(evaluate(parse(inputted))))
-
+    try:
+      print(lispstring(evaluate(parse(inputted))))
+    except Exception as e:
+      print(e)
+      
 def niceprint(string):
   if string is not None:
     newstring = lispstring(string)
