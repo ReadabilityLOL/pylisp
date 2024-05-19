@@ -201,7 +201,8 @@ def evaluate(parsed,env=normal_env):
   elif parsed[0] == "while":
     (_,conditional,body) = parsed
     while evaluate(conditional):
-      evaluate(body)
+      for x in body:
+        evaluate(x)
   # if isinstance(parsed,list):
   #   list1 = [evaluate(x,env=env) for x in parsed]
   #   op, *args = list1
@@ -209,8 +210,6 @@ def evaluate(parsed,env=normal_env):
 
   elif isinstance(parsed,str):
     return env.find(parsed)
-  elif isinstance(parsed,String):
-    return String.value
   elif isinstance(parsed[0],str):
     # if parsed in normal_env:
     #   return normal_env[parsed]
